@@ -2,7 +2,7 @@
 [![Travis build status](https://travis-ci.org/cloudyr/googleCloudVisionR.svg?branch=master)](https://travis-ci.org/cloudyr/googleCloudVisionR)
 [![Codecov test coverage](https://codecov.io/gh/cloudyr/googleCloudVisionR/branch/master/graph/badge.svg)](https://codecov.io/gh/cloudyr/googleCloudVisionR?branch=master)
 
-R Package for Image Recognition, Object Detection, and OCR using the Google's Cloud Vision API.
+R Package for Image Recognition, Object Detection, and OCR using the Google Cloud Vision API.
 
 ## Google Cloud Vision API
 
@@ -25,7 +25,13 @@ welcome.
 
 ## Installation
 
-The package is not yet on CRAN. You can install the package directly from Github:
+v0.1.0 is already available on CRAN, you can install it with:
+```r
+install.packages("googleCloudVisionR")
+```
+
+
+If you need the latest version, just install the package directly from Github:
 ``` r
 devtools::install_github("cloudyr/googleCloudVisionR")
 ```
@@ -55,7 +61,7 @@ library(googleCloudVisionR)
 ## Example
 
 Let us retrieve annotations for this image:
-![](inst/extdata/golden_retriever_puppies.jpg)
+![](man/figures/golden_retriever_puppies.jpg)
 
 Label detection (default), with maximum 7 results returned per image:
 

@@ -1,45 +1,43 @@
 context("integration")
 
-base_image_path <- "../../inst/extdata/"
-base_result_path <- "test_data/"
-cases <- data.table(
-    feature = list("LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"),
-    image_path = list("golden_retriever_puppies.jpg", "essex.jpg", "essex.jpg", "arnold_wife.jpg", "brandlogos.png", "notre-dame.jpg"),
-    result_data = list("label_detection.csv", "text_detection.csv", "document_text_detection.csv", "face_detection.csv", "logo_detection.csv", "landmark_detection.csv")
+baseImagePath <- "../../inst/extdata/"
+baseResultPath <- "test_data/"
+cases <- rbind(
+    data.table(feature = "LABEL_DETECTION",         image = "golden_retriever_puppies.jpg"),
+    data.table(feature = "TEXT_DETECTION",          image = "essex.jpg"),
+    data.table(feature = "DOCUMENT_TEXT_DETECTION", image = "essex.jpg"),
+    data.table(feature = "FACE_DETECTION",          image = "arnold_wife.jpg"),
+    data.table(feature = "LOGO_DETECTION",          image = "brandlogos.png"),
+    data.table(feature = "LANDMARK_DETECTION",      image = "notre-dame.jpg")
 )
+
+
 
 test_that("returns the right columns", {
     skip_on_cran()
     skip_on_travis()
 
-    purrr::pwalk(cases, function(feature, image_path, result_data) {
-        expect_equal(
-            gcv_get_image_annotations(paste0(base_image_path, image_path), feature = feature) %>% names(),
-            data.table::fread(paste0(base_result_path, result_data)) %>% names()
+    expectedColumns <- list(
+        "LABEL_DETECTION" = c("mid", "description", "score", "topicality"),
+        "TEXT_DETECTION" = c("description", "x", "y"),
+        "DOCUMENT_TEXT_DETECTION" = c("description", "x", "y"),
+        "FACE_DETECTION" = c("x", "y", "detection_confidence", "landmarking_confidence",
+            "joy_likelihood", "sorrow_likelihood", "anger_likelihood", "surprise_likelihood",
+            "under_exposed_likelihood", "blurred_likelihood", "headwear_likelihood"
+        ),
+        "LOGO_DETECTION" = c("mid", "description", "score", "x", "y"),
+        "LANDMARK_DETECTION" = c("mid", "description", "score", "x", "y", "latitude", "longitude")
+    )
+
+    purrr::walk(cases[["feature"]], ~{
+        expectedCols <- c(expectedColumns[[.x]], c("image_path", "feature"))
+        cat(getwd())
+        response <- gcv_get_image_annotations(
+            imagePaths = file.path("..", "..", "inst", "extdata", cases[feature == .x, image]),
+            feature = .x,
+            maxNumResults = 5
         )
-    })
-})
 
-test_that("returns the expected number of rows", {
-    skip_on_cran()
-    skip_on_travis()
-
-    purrr::pwalk(cases, function(feature, image_path, result_data) {
-        expect_equal(
-            gcv_get_image_annotations(paste0(base_image_path, image_path), feature = feature)[, .N],
-            data.table::fread(paste0(base_result_path, result_data))[, .N]
-        )
-    })
-})
-
-test_that("returns the expected number of rows", {
-    skip_on_cran()
-    skip_on_travis()
-
-    purrr::pwalk(cases, function(feature, image_path, result_data) {
-        expect_equal(
-            gcv_get_image_annotations(paste0(base_image_path, image_path), feature = feature)[, lapply(.SD, class)],
-            data.table::fread(paste0(base_result_path, result_data))[, lapply(.SD, class)]
-        )
+        expect_setequal(names(response), expectedCols)
     })
 })
